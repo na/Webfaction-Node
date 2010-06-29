@@ -4,7 +4,7 @@ A script to install [node.js][] on webfaction using [webfaction's][] api.
 
 ## How to Use
 
-Simply follow this [link][] below.
+Simply follow this [link][] which will take you to the Apps Add page on the webfaction control panel..
 
 Now to run the included 'Hello World' example log in and run
     node ~/webapps/<app_name>/server.js
