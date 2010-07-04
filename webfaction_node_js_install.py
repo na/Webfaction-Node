@@ -16,17 +16,31 @@ from sys import argv, exit
 from xmlrpclib import Server
 
 def create(app_name, server, session_id):
+
+    #define node version
+    node_version = 'node-v0.1.98'
+    
+    # initial config
+    home_dir = '%s/%s' % (account['home'], username)
+    app_dir = '%s/webapps/%s' % (home_dir, app_name)
+    bin_dir = '%s/bin' % app_dir
+    src_dir = '%s/src' % app_dir
+
+    # Create new "Custom App Listening on Port" 
     app = server.create_app(session_id, app_name, 'custom_app_with_port', False, '')
 
-    cmd = """\
-wget -q http://nodejs.org/dist/node-v0.1.98.tar.gz
-tar fxz node-v0.1.98.tar.gz
-rm node-v0.1.98.tar.gz
-cd node-v0.1.98
-./configure --jobs=%s --prefix=$HOME > configure-log 2>&1
-make >> make-log 2>&1
-make install >> install-log 2>&1
-""" % str(extra_info)
+    # download and install app
+    cmd = 'cd;' 
+    cmd += 'mkdir -p %s;' % bin_dir
+    cmd += 'mkdir -p %s;' % src_dir
+    cmd += 'cd %s;' % src_dir
+    cmd += 'wget -q http://nodejs.org/dist/%s.tar.gz > /dev/null 2>&1;' % node_version
+    cmd += 'tar fxz %s.tar.gz > /dev/null 2>&1;' % node_version
+    cmd += 'rm %s.tar.gz;' % node_version
+    cmd += 'cd %s/%s;' % (src_dir, node_version)
+    cmd += './configure --jobs=1 --prefix=%s > /dev/nul 2>&1;' % app_dir
+    cmd += 'make > /dev/null 2>&1;'
+    cmd += 'make install > /dev/null 2>&1;'
 
     server.system(session_id, cmd)
 
