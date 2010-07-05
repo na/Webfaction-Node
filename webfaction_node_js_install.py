@@ -8,11 +8,10 @@ node.js install/uninstall script for WebFaction.  Will install
 code from http://nodejs.org/dist/node-v0.1.98.tar.gz. This installs
 node.js along with V8 engine. 
 
-To test if node is working check autostart and create a website with 
-with the app mounted at '/'.  Then open your browser and go to the 
-website you just created and you should see "Hello World".
+To test if node is working log into your account and run the server.js script.  Then create a website with with the app mounted at '/'.  Then open 
+your browser and go to the website you just created and you should see "Hello World".
 
-autostart: Start the "Hello World" example?
+autostart: Not Applicable
 extra info: Not Applicable 
 
 """
@@ -66,6 +65,7 @@ sys.puts('Server listening on port %s');
     """ % (bin_dir, app['port'], app['port'])
     server.write_file(session_id, filename, _file) 
 
+    # change script to executable
     cmd = 'chmod 711 %s' % filename
     server.system(session_id, cmd)
 
