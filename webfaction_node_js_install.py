@@ -69,10 +69,6 @@ sys.puts('Server listening on port %s');
     cmd = 'chmod 711 %s' % filename
     server.system(session_id, cmd)
 
-    if autostart:
-        cmd = '%s &' % filename
-    server.system(session_id, cmd)
-
     print "node app: %s created listening on port: %s " % (app['id'], app['port'])
 
 def delete(app_name, server, session_id):
