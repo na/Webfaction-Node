@@ -2,13 +2,18 @@
 #!/bin/env python
 
 """
-node.js install/uninstall script for WebFaction.  Will install
-code from hhttp://nodejs.org/dist/node-v0.1.98.tar.gz. This installs
-node.js along with V8 engine. The node.js files
-are found in ~/webapps/<app_name>/node-v0.1.98
+Node v0.1.98
 
-autostart: Not Applicable
-extra info: Number of jobs as integer
+node.js install/uninstall script for WebFaction.  Will install
+code from http://nodejs.org/dist/node-v0.1.98.tar.gz. This installs
+node.js along with V8 engine. 
+
+To test if node is working check autostart and create a website with 
+with the app mounted at '/'.  Then open your browser and go to the 
+website you just created and you should see "Hello World".
+
+autostart: Start the "Hello World" example?
+extra info: Not Applicable 
 
 """
 
@@ -38,23 +43,35 @@ def create(app_name, server, session_id):
     cmd += 'tar fxz %s.tar.gz > /dev/null 2>&1;' % node_version
     cmd += 'rm %s.tar.gz;' % node_version
     cmd += 'cd %s/%s;' % (src_dir, node_version)
-    cmd += './configure --jobs=1 --prefix=%s > /dev/nul 2>&1;' % app_dir
+    cmd += './configure --jobs=1 --prefix=%s > /dev/null 2>&1;' % app_dir
     cmd += 'make > /dev/null 2>&1;'
     cmd += 'make install > /dev/null 2>&1;'
-
+    cmd += 'cd;'
+    cmd += 'rm -rf %s;' % src_dir
     server.system(session_id, cmd)
 
+    # create a "hello world" file to use with node
+    filename = '%s/server.js' % app_dir
     _file = """\
-    var sys = require('sys'),
-        http = require('http');
-    http.createServer(function (req, res) {
-        res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.end('Hello World');
-    }).listen(%s, "127.0.0.1");
-    sys.puts('Server listening on port %s');
-    """ % (app['port'], app['port'])
+#!%s/node
+var sys = require('sys'),
+    http = require('http');
 
-    server.write_file(session_id, "server.js", _file)
+http.createServer(function (req, res) {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('Hello World');
+}).listen(%s, "127.0.0.1");
+    
+sys.puts('Server listening on port %s');
+    """ % (bin_dir, app['port'], app['port'])
+    server.write_file(session_id, filename, _file) 
+
+    cmd = 'chmod 711 %s' % filename
+    server.system(session_id, cmd)
+
+    if autostart:
+        cmd = '%s &' % filename
+    server.system(session_id, cmd)
 
     print "node app: %s created listening on port: %s " % (app['id'], app['port'])
 
@@ -65,12 +82,6 @@ if __name__ == '__main__':
     action, username, password, machine, app_name, autostart, extra_info = argv[1:]
     server = Server('https://api.webfaction.com/')
     session_id, account = server.login(username, password, machine)
-
-    try:
-        int(extra_info)
-    except:
-        print 'Extra information must be an integer.'
-        exit()
 
     locals()[action](app_name, server, session_id)
 -----END WEBFACTION INSTALL SCRIPT-----
